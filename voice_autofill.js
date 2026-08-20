@@ -1,0 +1,420 @@
+(function () {
+  'use strict';
+
+  var APP_ID = 'ra-voice-autofill';
+  var STORAGE_KEY = 'ra-voice-autofill-v1';
+
+  if (document.getElementById(APP_ID)) return;
+
+  var GROUPS = [
+    {
+      title: 'Grand summon',
+      rows: [
+        { key: 'summon', label: '召喚', span: true }
+      ]
+    },
+    {
+      title: 'Synthesis',
+      rows: [
+        { key: 'level1', label: 'レベルアップ', sub: '1' },
+        { key: 'level2', label: '~', sub: '2' },
+        { key: 'level3', label: '~', sub: '3' },
+        { key: 'ascension1', label: '霊基再臨', sub: '1' },
+        { key: 'ascension2', label: '~', sub: '2' },
+        { key: 'ascension3', label: '~', sub: '3' },
+        { key: 'ascension4', label: '~', sub: '4' }
+      ]
+    },
+    {
+      title: 'Battle',
+      rows: [
+        { key: 'start1', label: '開始', sub: '1' },
+        { key: 'start2', label: '~', sub: '2' },
+        { key: 'start3', label: '~', sub: '3' },
+        { key: 'start4', label: '~', sub: '4' },
+        { key: 'skill1', label: 'スキル', sub: '1' },
+        { key: 'skill2', label: '~', sub: '2' },
+        { key: 'skill3', label: '~', sub: '3' },
+        { key: 'skill4', label: '~', sub: '4' },
+        { key: 'command1', label: 'コマンドカード', sub: '1' },
+        { key: 'command2', label: '~', sub: '2' },
+        { key: 'command3', label: '~', sub: '3' },
+        { key: 'npCard1', label: '宝具カード', sub: '1' },
+        { key: 'npCard2', label: '~', sub: '2' },
+        { key: 'npCard3', label: '~', sub: '3' },
+        { key: 'attack1', label: 'アタック', sub: '1' },
+        { key: 'attack2', label: '~', sub: '2' },
+        { key: 'attack3', label: '~', sub: '3' },
+        { key: 'attack4', label: '~', sub: '4' },
+        { key: 'attack5', label: '~', sub: '5' },
+        { key: 'attack6', label: '~', sub: '6' },
+        { key: 'extra1', label: 'エクストラアタック', sub: '1' },
+        { key: 'extra2', label: '~', sub: '2' },
+        { key: 'extra3', label: '~', sub: '3' },
+        { key: 'extra4', label: '~', sub: '4' },
+        { key: 'np1', label: '宝具', sub: '1' },
+        { key: 'np2', label: '~', sub: '2' },
+        { key: 'np3', label: '~', sub: '3' },
+        { key: 'damage1', label: 'ダメージ', sub: '1' },
+        { key: 'damage2', label: '~', sub: '2' },
+        { key: 'damage3', label: '~', sub: '3' },
+        { key: 'damage4', label: '~', sub: '4' },
+        { key: 'defeat1', label: '戦闘不能', sub: '1' },
+        { key: 'defeat2', label: '~', sub: '2' },
+        { key: 'defeat3', label: '~', sub: '3' },
+        { key: 'defeat4', label: '~', sub: '4' },
+        { key: 'victory1', label: '勝利', sub: '1' },
+        { key: 'victory2', label: '~', sub: '2' },
+        { key: 'victory3', label: '~', sub: '3' },
+        { key: 'victory4', label: '~', sub: '4' }
+      ]
+    },
+    {
+      title: 'My room',
+      rows: [
+        { key: 'talk1', label: '会話', sub: '1' },
+        { key: 'talk2', label: '~', sub: '2' },
+        { key: 'talk3', label: '~', sub: '3' },
+        { key: 'talk4', label: '~', sub: '4' },
+        { key: 'talk5', label: '~', sub: '5' },
+        { key: 'talk6', label: '~', sub: '6' },
+        { key: 'talk7', label: '~', sub: '7' },
+        { key: 'likes', label: '好きなこと', span: true },
+        { key: 'dislikes', label: '嫌いなこと', span: true },
+        { key: 'grail', label: '聖杯について', span: true },
+        { key: 'bond1', label: '絆', sub: 'Lv.1' },
+        { key: 'bond2', label: '~', sub: 'Lv.2' },
+        { key: 'bond3', label: '~', sub: 'Lv.3' },
+        { key: 'bond4', label: '~', sub: 'Lv.4' },
+        { key: 'bond5', label: '~', sub: 'Lv.5' },
+        { key: 'event', label: 'イベント開催中', span: true },
+        { key: 'birthday', label: '誕生日', span: true }
+      ]
+    }
+  ];
+
+  var TRUE_NAME_EXTRA = { key: 'costume', label: '霊衣について', span: true };
+
+  var style = document.createElement('style');
+  style.textContent = [
+    '#' + APP_ID + '{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;max-width:1180px;margin:16px auto;padding:16px;border:1px solid #d8dee6;border-radius:10px;background:#fff;color:#222;box-sizing:border-box}',
+    '#' + APP_ID + ' *{box-sizing:border-box}',
+    '#' + APP_ID + ' h2{margin:0 0 8px;font-size:22px}',
+    '#' + APP_ID + ' .ra-note{margin:0 0 14px;color:#555;font-size:13px;line-height:1.7}',
+    '#' + APP_ID + ' details{border:1px solid #d8dee6;border-radius:8px;margin:10px 0;background:#fafbfc}',
+    '#' + APP_ID + ' summary{cursor:pointer;font-weight:700;padding:10px 12px;background:#f1f3f5;border-radius:8px}',
+    '#' + APP_ID + ' details[open] summary{border-bottom:1px solid #d8dee6;border-radius:8px 8px 0 0}',
+    '#' + APP_ID + ' .ra-body{padding:12px}',
+    '#' + APP_ID + ' .ra-row{display:grid;grid-template-columns:140px 90px minmax(0,1fr);gap:8px;align-items:start;margin:8px 0}',
+    '#' + APP_ID + ' .ra-row.ra-span{grid-template-columns:230px minmax(0,1fr)}',
+    '#' + APP_ID + ' .ra-label,#' + APP_ID + ' .ra-sub{font-size:13px;font-weight:600;padding-top:9px}',
+    '#' + APP_ID + ' textarea{width:100%;min-height:62px;border:1px solid #cbd3dc;border-radius:6px;padding:8px;background:#fff;color:#222;font:inherit;line-height:1.55;resize:vertical}',
+    '#' + APP_ID + ' .ra-actions{display:flex;flex-wrap:wrap;gap:8px;margin:14px 0}',
+    '#' + APP_ID + ' button{border:1px solid #9aa7b4;background:#f5f7f9;color:#222;border-radius:6px;padding:8px 14px;cursor:pointer;font-weight:600}',
+    '#' + APP_ID + ' button:hover{background:#e9edf1}',
+    '#' + APP_ID + ' button.ra-primary{background:#2f6fdd;color:#fff;border-color:#2f6fdd}',
+    '#' + APP_ID + ' .ra-check{display:flex;align-items:center;gap:8px;font-size:14px;font-weight:600}',
+    '#' + APP_ID + ' .ra-output{min-height:360px;font-family:Consolas,"Noto Sans Mono CJK JP",monospace;white-space:pre;tab-size:2}',
+    '#' + APP_ID + ' .ra-status{min-height:20px;font-size:13px;color:#2c6b2f}',
+    '#' + APP_ID + ' .ra-example{padding:8px 10px;background:#fff;border:1px dashed #cbd3dc;border-radius:6px;font-size:13px;line-height:1.7}',
+    '@media(max-width:760px){#' + APP_ID + '{padding:10px}#' + APP_ID + ' .ra-row,#' + APP_ID + ' .ra-row.ra-span{grid-template-columns:1fr}#' + APP_ID + ' .ra-label,#' + APP_ID + ' .ra-sub{padding-top:0}}'
+  ].join('');
+  document.head.appendChild(style);
+
+  var root = document.createElement('div');
+  root.id = APP_ID;
+  root.innerHTML = [
+    '<h2>FGO 台詞オートフィル</h2>',
+    '<p class="ra-note">台詞を入力すると、指定テンプレートの <code>#region(close,セリフ一覧)</code> を生成します。生成時に「... / …」を「……」、「-- / — / ―」を「――」へ整形し、半角 ! ? を全角へ変換します。感嘆符・疑問符が文末でない場合は後ろに半角空白を1つ入れます。</p>',
+    '<details open>',
+      '<summary>出力設定</summary>',
+      '<div class="ra-body">',
+        '<label class="ra-check"><input id="ra-enable-true-name" type="checkbox"> 真名判明時の台詞を有効化する（OFF時はテンプレートどおり <code>#co()</code> 内へ格納）</label>',
+        '<div class="ra-example" style="margin-top:10px">入力例：<code>えっ!?本当に...?</code> → <code>えっ！？ 本当に……？</code></div>',
+      '</div>',
+    '</details>',
+    '<div id="ra-normal"></div>',
+    '<div id="ra-true-name"></div>',
+    '<div class="ra-actions">',
+      '<button id="ra-generate" class="ra-primary" type="button">@wiki記法を生成</button>',
+      '<button id="ra-copy" type="button">生成結果をコピー</button>',
+      '<button id="ra-save" type="button">入力内容を保存</button>',
+      '<button id="ra-clear" type="button">すべてクリア</button>',
+    '</div>',
+    '<div id="ra-status" class="ra-status" aria-live="polite"></div>',
+    '<div><label for="ra-output" style="display:block;font-size:13px;font-weight:700;margin-bottom:4px">生成結果</label><textarea id="ra-output" class="ra-output" spellcheck="false" placeholder="ここに@wiki記法が生成されます"></textarea></div>'
+  ].join('');
+
+  var current = document.currentScript;
+  if (current && current.parentNode) current.parentNode.insertBefore(root, current.nextSibling);
+  else document.body.appendChild(root);
+
+  var normalHost = root.querySelector('#ra-normal');
+  var trueNameHost = root.querySelector('#ra-true-name');
+  var statusEl = root.querySelector('#ra-status');
+  var outputEl = root.querySelector('#ra-output');
+  var trueNameToggle = root.querySelector('#ra-enable-true-name');
+
+  function escHtml(value) {
+    return String(value).replace(/[&<>"']/g, function (ch) {
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
+    });
+  }
+
+  function rowInputHtml(prefix, row) {
+    var label = row.label === '~' ? '同上' : row.label;
+    if (row.span) {
+      return '<div class="ra-row ra-span"><div class="ra-label">' + escHtml(label) + '</div><textarea data-prefix="' + prefix + '" data-key="' + row.key + '" aria-label="' + escHtml(label) + '"></textarea></div>';
+    }
+    return '<div class="ra-row"><div class="ra-label">' + escHtml(label) + '</div><div class="ra-sub">' + escHtml(row.sub || '') + '</div><textarea data-prefix="' + prefix + '" data-key="' + row.key + '" aria-label="' + escHtml(label + ' ' + (row.sub || '')) + '"></textarea></div>';
+  }
+
+  function editorHtml(prefix, title, includeCostume) {
+    var parts = ['<details class="ra-editor" data-prefix="' + prefix + '" ' + (prefix === 'normal' ? 'open' : '') + '><summary>' + escHtml(title) + '</summary><div class="ra-body">'];
+    GROUPS.forEach(function (group) {
+      parts.push('<h3 style="font-size:15px;margin:14px 0 6px">' + escHtml(group.title) + '</h3>');
+      group.rows.forEach(function (row) { parts.push(rowInputHtml(prefix, row)); });
+    });
+    if (includeCostume) {
+      parts.push('<h3 style="font-size:15px;margin:14px 0 6px">My room 追加</h3>');
+      parts.push(rowInputHtml(prefix, TRUE_NAME_EXTRA));
+    }
+    parts.push('</div></details>');
+    return parts.join('');
+  }
+
+  normalHost.innerHTML = editorHtml('normal', '通常台詞', false);
+  trueNameHost.innerHTML = editorHtml('trueName', '真名判明時', true);
+
+  function setStatus(text, isError) {
+    statusEl.textContent = text || '';
+    statusEl.style.color = isError ? '#b42318' : '#2c6b2f';
+  }
+
+  function normalizeNewlines(value) {
+    return String(value == null ? '' : value).replace(/\r\n?/g, '\n');
+  }
+
+  function normalizePunctuationLine(line) {
+    var text = String(line || '');
+
+    text = text.replace(/\.{2,}/g, '……');
+    text = text.replace(/…+/g, '……');
+    text = text.replace(/・{3,}/g, '……');
+    text = text.replace(/(?:--+|－{2,}|—+|―+)/g, '――');
+    text = text.replace(/!/g, '！').replace(/\?/g, '？');
+
+    var result = '';
+    var i = 0;
+    while (i < text.length) {
+      var ch = text.charAt(i);
+      if (ch !== '！' && ch !== '？') {
+        result += ch;
+        i++;
+        continue;
+      }
+
+      var marks = '';
+      while (i < text.length && (text.charAt(i) === '！' || text.charAt(i) === '？')) {
+        marks += text.charAt(i);
+        i++;
+      }
+      result += marks;
+
+      var rest = text.slice(i);
+      if (!rest) continue;
+      if (/^[ \t\u3000]/.test(rest)) {
+        rest = rest.replace(/^[ \t\u3000]+/, ' ');
+        text = text.slice(0, i) + rest;
+        continue;
+      }
+
+      // 閉じ括弧だけが後ろに続いて行末になる場合は文末扱い。
+      if (/^[」』）】〉》〕］｝”’]+$/.test(rest)) continue;
+
+      result += ' ';
+    }
+    return result;
+  }
+
+  function normalizeVoice(value) {
+    return normalizeNewlines(value).split('\n').map(normalizePunctuationLine).join('\n');
+  }
+
+  function wikiCell(value) {
+    var normalized = normalizeVoice(value).replace(/\|/g, '&#124;');
+    if (!normalized) return '';
+    return normalized.split('\n').join('&br()');
+  }
+
+  function collect(prefix) {
+    var data = {};
+    Array.prototype.forEach.call(root.querySelectorAll('[data-prefix="' + prefix + '"][data-key]'), function (el) {
+      data[el.getAttribute('data-key')] = el.value;
+    });
+    return data;
+  }
+
+  function tableHeader(lines, title) {
+    lines.push('|>|>|BGCOLOR(#E6E6FA):CENTER:' + title + '|');
+  }
+
+  function pushRow(lines, row, data) {
+    var value = wikiCell(data[row.key] || '');
+    if (row.span) {
+      lines.push('|>|' + row.label + '|' + value + '|');
+    } else {
+      lines.push('|' + row.label + '|' + row.sub + '|' + value + '|');
+    }
+  }
+
+  function buildVoiceRegion(title, data, includeCostume) {
+    var lines = [];
+    lines.push('#region(close,' + title + ')');
+    lines.push('|BGCOLOR(#F5FFFA):CENTER:110|BGCOLOR(#F5FFFA):CENTER:40|BGCOLOR(#F5FFFA):LEFT:1000|c');
+
+    GROUPS.forEach(function (group) {
+      tableHeader(lines, group.title);
+      group.rows.forEach(function (row) { pushRow(lines, row, data); });
+    });
+    if (includeCostume) pushRow(lines, TRUE_NAME_EXTRA, data);
+
+    lines.push('#endregion()');
+    return lines.join('\n');
+  }
+
+  function buildOutput() {
+    var normal = collect('normal');
+    var trueName = collect('trueName');
+    var lines = [];
+
+    lines.push('//新テンプレ');
+    lines.push('//  ・「……」：三点リーダー');
+    lines.push('//  ・「――」：ダッシュ');
+    lines.push('//  ・ 感嘆符、疑問符は全角。文末でなければ後ろに空白を挿入する');
+    lines.push('');
+    lines.push('#region(close,セリフ一覧)');
+    lines.push('|BGCOLOR(#F5FFFA):CENTER:110|BGCOLOR(#F5FFFA):CENTER:40|BGCOLOR(#F5FFFA):LEFT:1000|c');
+    GROUPS.forEach(function (group) {
+      tableHeader(lines, group.title);
+      group.rows.forEach(function (row) { pushRow(lines, row, normal); });
+    });
+    lines.push('');
+    lines.push('// 真名が存在するサーヴァントの場合、#co()を解除して使用する');
+
+    var trueRegion = buildVoiceRegion('真名判明時', trueName, true);
+    if (trueNameToggle.checked) {
+      lines.push(trueRegion);
+    } else {
+      lines.push('#co(){{{{{');
+      lines.push(trueRegion);
+      lines.push('}}}}}');
+    }
+
+    lines.push('');
+    lines.push('#endregion()');
+    return lines.join('\n');
+  }
+
+  function allFieldElements() {
+    return Array.prototype.slice.call(root.querySelectorAll('input, textarea'));
+  }
+
+  function serialize() {
+    var data = {};
+    allFieldElements().forEach(function (el, i) {
+      var key;
+      if (el.hasAttribute('data-prefix') && el.hasAttribute('data-key')) {
+        key = el.getAttribute('data-prefix') + '_' + el.getAttribute('data-key');
+      } else {
+        key = el.id || ('field_' + i);
+      }
+      data[key] = el.type === 'checkbox' ? el.checked : el.value;
+    });
+    return data;
+  }
+
+  function save(showMessage) {
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(serialize()));
+      if (showMessage !== false) setStatus('入力内容をこのブラウザに保存しました。');
+    } catch (e) {
+      if (showMessage !== false) setStatus('入力内容を保存できませんでした。', true);
+    }
+  }
+
+  function restore() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      if (!raw) return;
+      var data = JSON.parse(raw);
+      allFieldElements().forEach(function (el, i) {
+        var key;
+        if (el.hasAttribute('data-prefix') && el.hasAttribute('data-key')) {
+          key = el.getAttribute('data-prefix') + '_' + el.getAttribute('data-key');
+        } else {
+          key = el.id || ('field_' + i);
+        }
+        if (!Object.prototype.hasOwnProperty.call(data, key)) return;
+        if (el.type === 'checkbox') el.checked = !!data[key];
+        else el.value = data[key];
+      });
+      applyTrueNameVisibility();
+      setStatus('前回保存した入力内容を復元しました。');
+    } catch (e) {
+      setStatus('保存データの復元に失敗しました。', true);
+    }
+  }
+
+  function generate() {
+    outputEl.value = buildOutput();
+    save(false);
+    setStatus('生成しました。句読点・三点リーダー・ダッシュを指定形式へ整形しています。');
+  }
+
+  function fallbackCopy() {
+    outputEl.focus();
+    outputEl.select();
+    try {
+      document.execCommand('copy');
+      setStatus('生成結果をクリップボードへコピーしました。');
+    } catch (e) {
+      setStatus('自動コピーに失敗しました。生成結果を選択して手動でコピーしてください。', true);
+    }
+  }
+
+  function copyOutput() {
+    if (!outputEl.value.trim()) generate();
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(outputEl.value).then(function () {
+        setStatus('生成結果をクリップボードへコピーしました。');
+      }).catch(fallbackCopy);
+    } else fallbackCopy();
+  }
+
+  function clearAll() {
+    if (!window.confirm('入力内容と保存データをすべて消去します。よろしいですか？')) return;
+    localStorage.removeItem(STORAGE_KEY);
+    allFieldElements().forEach(function (el) {
+      if (el.type === 'checkbox') el.checked = false;
+      else el.value = '';
+    });
+    outputEl.value = '';
+    applyTrueNameVisibility();
+    setStatus('クリアしました。');
+  }
+
+  function applyTrueNameVisibility() {
+    var editor = trueNameHost.querySelector('.ra-editor');
+    editor.style.opacity = trueNameToggle.checked ? '1' : '0.72';
+  }
+
+  root.querySelector('#ra-generate').addEventListener('click', generate);
+  root.querySelector('#ra-copy').addEventListener('click', copyOutput);
+  root.querySelector('#ra-save').addEventListener('click', function () { save(true); });
+  root.querySelector('#ra-clear').addEventListener('click', clearAll);
+  trueNameToggle.addEventListener('change', applyTrueNameVisibility);
+
+  restore();
+  applyTrueNameVisibility();
+}());
