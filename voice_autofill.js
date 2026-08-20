@@ -15,61 +15,16 @@
   function series(prefix, label, count, subFn) {
     var rows = [];
     for (var i = 1; i <= count; i++) {
-      rows.push({
-        key: prefix + i,
-        family: prefix,
-        label: label,
-        sub: subFn ? subFn(i) : String(i)
-      });
+      rows.push({ key: prefix + i, family: prefix, label: label, sub: subFn ? subFn(i) : String(i) });
     }
     return rows;
   }
 
   var GROUPS = [
-    {
-      id: 'grand',
-      title: 'Grand summon',
-      rows: [
-        span('summon', '召喚'),
-        span('temporaryJoin', '仮加入'),
-        span('fullJoin', '本加入')
-      ]
-    },
-    {
-      id: 'synthesis',
-      title: 'Synthesis',
-      rows: series('level', 'レベルアップ', 3).concat(
-        series('ascension', '霊基再臨', 4)
-      )
-    },
-    {
-      id: 'battle',
-      title: 'Battle',
-      rows: [].concat(
-        series('start', '開始', 4),
-        series('skill', 'スキル', 4),
-        series('command', 'コマンドカード', 3),
-        series('npCard', '宝具カード', 3),
-        series('attack', 'アタック', 6),
-        series('extra', 'エクストラアタック', 4),
-        series('np', '宝具', 3),
-        series('damage', 'ダメージ', 4),
-        series('defeat', '戦闘不能', 4),
-        series('victory', '勝利', 4)
-      )
-    },
-    {
-      id: 'myroom',
-      title: 'My room',
-      rows: [
-        span('likes', '好きなこと'),
-        span('dislikes', '嫌いなこと'),
-        span('grail', '聖杯について')
-      ].concat(
-        series('bond', '絆', 5, function (i) { return 'Lv.' + i; }),
-        [span('event', 'イベント開催中'), span('birthday', '誕生日')]
-      )
-    }
+    { id: 'grand', title: 'Grand summon', rows: [span('summon', '召喚'), span('temporaryJoin', '仮加入'), span('fullJoin', '本加入')] },
+    { id: 'synthesis', title: 'Synthesis', rows: series('level', 'レベルアップ', 3).concat(series('ascension', '霊基再臨', 4)) },
+    { id: 'battle', title: 'Battle', rows: [].concat(series('start', '開始', 4), series('skill', 'スキル', 4), series('command', 'コマンドカード', 3), series('npCard', '宝具カード', 3), series('attack', 'アタック', 6), series('extra', 'エクストラアタック', 4), series('np', '宝具', 3), series('damage', 'ダメージ', 4), series('defeat', '戦闘不能', 4), series('victory', '勝利', 4)) },
+    { id: 'myroom', title: 'My room', rows: [span('likes', '好きなこと'), span('dislikes', '嫌いなこと'), span('grail', '聖杯について')].concat(series('bond', '絆', 5, function (i) { return 'Lv.' + i; }), [span('event', 'イベント開催中'), span('birthday', '誕生日')]) }
   ];
 
   var DIFF_EXTRA = span('costume', '霊衣について');
@@ -110,12 +65,7 @@
     '<div id="ra-normal"></div>',
     '<div class="ra-actions"><button id="ra-add-diff" type="button">差分を追加</button></div>',
     '<div id="ra-diffs"></div>',
-    '<div class="ra-actions">',
-      '<button id="ra-generate" class="ra-primary" type="button">@wiki記法を生成</button>',
-      '<button id="ra-copy" type="button">生成結果をコピー</button>',
-      '<button id="ra-save" type="button">入力内容を保存</button>',
-      '<button id="ra-clear" type="button">すべてクリア</button>',
-    '</div>',
+    '<div class="ra-actions"><button id="ra-generate" class="ra-primary" type="button">@wiki記法を生成</button><button id="ra-copy" type="button">生成結果をコピー</button><button id="ra-save" type="button">入力内容を保存</button><button id="ra-clear" type="button">すべてクリア</button></div>',
     '<div id="ra-status" class="ra-status" aria-live="polite"></div>',
     '<div><label for="ra-output" style="display:block;font-size:13px;font-weight:700;margin-bottom:4px">生成結果</label><textarea id="ra-output" class="ra-output" spellcheck="false"></textarea></div>'
   ].join('');
@@ -129,33 +79,18 @@
   var statusEl = root.querySelector('#ra-status');
   var outputEl = root.querySelector('#ra-output');
 
-  function esc(value) {
-    return String(value).replace(/[&<>"']/g, function (ch) {
-      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch];
-    });
-  }
-
-  function rowHtml(row) {
-    if (row.span) {
-      return '<div class="ra-row ra-span"><div class="ra-label">' + esc(row.label) + '</div><textarea data-key="' + row.key + '"></textarea></div>';
-    }
-    return '<div class="ra-row"><div class="ra-label">' + esc(row.label) + '</div><div class="ra-sub">' + esc(row.sub) + '</div><textarea data-key="' + row.key + '"></textarea></div>';
-  }
-
-  function talkRow(index) {
-    return { key: 'talk' + index, family: 'talk', label: '会話', sub: String(index) };
-  }
+  function esc(value) { return String(value).replace(/[&<>"']/g, function (ch) { return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]; }); }
+  function rowHtml(row) { if (row.span) return '<div class="ra-row ra-span"><div class="ra-label">' + esc(row.label) + '</div><textarea data-key="' + row.key + '"></textarea></div>'; return '<div class="ra-row"><div class="ra-label">' + esc(row.label) + '</div><div class="ra-sub">' + esc(row.sub) + '</div><textarea data-key="' + row.key + '"></textarea></div>'; }
+  function talkRow(index) { return { key: 'talk' + index, family: 'talk', label: '会話', sub: String(index) }; }
 
   function editorBodyHtml(extra) {
     var parts = [];
     GROUPS.forEach(function (group) {
-      parts.push('<section data-group="' + group.id + '">');
-      parts.push('<h3 style="font-size:15px;margin:14px 0 6px">' + esc(group.title) + '</h3>');
+      parts.push('<section data-group="' + group.id + '"><h3 style="font-size:15px;margin:14px 0 6px">' + esc(group.title) + '</h3>');
       if (group.id === 'myroom') {
         parts.push('<div data-talk-list>');
         for (var i = 1; i <= 3; i++) parts.push(rowHtml(talkRow(i)));
-        parts.push('</div>');
-        parts.push('<div class="ra-talk-actions"><button type="button" data-add-talk>会話を追加</button></div>');
+        parts.push('</div><div class="ra-talk-actions"><button type="button" data-add-talk>会話を追加</button></div>');
       }
       group.rows.forEach(function (row) { parts.push(rowHtml(row)); });
       if (group.id === 'myroom' && extra) parts.push(rowHtml(DIFF_EXTRA));
@@ -165,126 +100,51 @@
   }
 
   function diffHtml(id, title) {
-    return [
-      '<details class="ra-editor ra-diff" data-diff-id="' + id + '" open>',
-      '<summary>差分台詞 ' + id + '</summary>',
-      '<div class="ra-body">',
-        '<div class="ra-diff-head">',
-          '<div class="ra-field"><label>差分ブロック名</label><input type="text" data-role="diff-title" value="' + esc(title || ('差分台詞' + id)) + '"></div>',
-          '<button type="button" class="ra-danger" data-remove-diff>この差分を削除</button>',
-        '</div>',
-        editorBodyHtml(true),
-      '</div>',
-      '</details>'
-    ].join('');
+    return '<details class="ra-editor ra-diff" data-diff-id="' + id + '" open><summary>差分台詞 ' + id + '</summary><div class="ra-body"><div class="ra-diff-head"><div class="ra-field"><label>差分ブロック名</label><input type="text" data-role="diff-title" value="' + esc(title || ('差分台詞' + id)) + '"></div><button type="button" class="ra-danger" data-remove-diff>この差分を削除</button></div>' + editorBodyHtml(true) + '</div></details>';
   }
 
   normalHost.innerHTML = '<details class="ra-editor" open><summary>通常台詞</summary><div class="ra-body">' + editorBodyHtml(false) + '</div></details>';
 
-  function setStatus(text, isError) {
-    statusEl.textContent = text || '';
-    statusEl.style.color = isError ? '#b42318' : '#2c6b2f';
-  }
-
-  function nl(value) {
-    return String(value == null ? '' : value).replace(/\r\n?/g, '\n');
-  }
-
-  function filled(value) {
-    return nl(value).trim() !== '';
-  }
+  function setStatus(text, isError) { statusEl.textContent = text || ''; statusEl.style.color = isError ? '#b42318' : '#2c6b2f'; }
+  function nl(value) { return String(value == null ? '' : value).replace(/\r\n?/g, '\n'); }
+  function filled(value) { return nl(value).trim() !== ''; }
 
   function normLine(line) {
-    var text = String(line || '')
-      .replace(/\.{2,}/g, '……')
-      .replace(/…+/g, '……')
-      .replace(/・{3,}/g, '……')
-      .replace(/(?:--+|－{2,}|—+|―+)/g, '――')
-      .replace(/!/g, '！')
-      .replace(/\?/g, '？');
-
-    var result = '';
-    var i = 0;
+    var text = String(line || '').replace(/\.{2,}/g, '……').replace(/…+/g, '……').replace(/・{3,}/g, '……').replace(/(?:--+|－{2,}|—+|―+)/g, '――').replace(/!/g, '！').replace(/\?/g, '？');
+    var result = '', i = 0;
     while (i < text.length) {
       var ch = text.charAt(i);
-      if (ch !== '！' && ch !== '？') {
-        result += ch;
-        i++;
-        continue;
-      }
+      if (ch !== '！' && ch !== '？') { result += ch; i++; continue; }
       var marks = '';
       while (i < text.length && (text.charAt(i) === '！' || text.charAt(i) === '？')) marks += text.charAt(i++);
       result += marks;
       var rest = text.slice(i);
       if (!rest) continue;
-      if (/^[ \t\u3000]/.test(rest)) {
-        result += ' ';
-        text = text.slice(0, i) + rest.replace(/^[ \t\u3000]+/, '');
-        continue;
-      }
+      if (/^[ \t\u3000]/.test(rest)) { result += ' '; text = text.slice(0, i) + rest.replace(/^[ \t\u3000]+/, ''); continue; }
       if (/^[」』）】〉》〕］｝”’]+$/.test(rest)) continue;
       result += ' ';
     }
     return result;
   }
 
-  function cell(value) {
-    return nl(value)
-      .split('\n')
-      .map(normLine)
-      .join('\n')
-      .replace(/\|/g, '&#124;')
-      .split('\n')
-      .join('&br()');
-  }
-
-  function collect(editor) {
-    var data = {};
-    Array.prototype.forEach.call(editor.querySelectorAll('[data-key]'), function (el) {
-      data[el.getAttribute('data-key')] = el.value;
-    });
-    return data;
-  }
+  function cell(value) { return nl(value).split('\n').map(normLine).join('\n').replace(/\|/g, '&#124;').split('\n').join('&br()'); }
+  function collect(editor) { var data = {}; Array.prototype.forEach.call(editor.querySelectorAll('[data-key]'), function (el) { data[el.getAttribute('data-key')] = el.value; }); return data; }
 
   function talkIndicesFromData(data) {
     var indices = [];
-    Object.keys(data || {}).forEach(function (key) {
-      var match = key.match(/^talk(\d+)$/);
-      if (match) indices.push(Number(match[1]));
-    });
+    Object.keys(data || {}).forEach(function (key) { var match = key.match(/^talk(\d+)$/); if (match) indices.push(Number(match[1])); });
     return indices.sort(function (a, b) { return a - b; });
   }
-
-  function talkRowsForData(data) {
-    return talkIndicesFromData(data).map(talkRow);
-  }
-
-  function groupRows(group, data) {
-    if (group.id !== 'myroom') return group.rows;
-    return talkRowsForData(data).concat(group.rows);
-  }
-
-  function used(group, data) {
-    return groupRows(group, data).filter(function (row) {
-      return filled(data[row.key]);
-    });
-  }
-
-  function hasData(data, extra) {
-    var has = GROUPS.some(function (group) {
-      return used(group, data).length > 0;
-    });
-    return has || (extra && filled(data.costume));
-  }
+  function talkRowsForData(data) { return talkIndicesFromData(data).map(talkRow); }
+  function groupRows(group, data) { return group.id === 'myroom' ? talkRowsForData(data).concat(group.rows) : group.rows; }
+  function used(group, data) { return groupRows(group, data).filter(function (row) { return filled(data[row.key]); }); }
+  function hasData(data, extra) { return GROUPS.some(function (group) { return used(group, data).length > 0; }) || (extra && filled(data.costume)); }
 
   function pushRows(lines, rows, data) {
     var seen = {};
     rows.forEach(function (row) {
       var value = cell(data[row.key]);
-      if (row.span) {
-        lines.push('|>|' + row.label + '|' + value + '|');
-        return;
-      }
+      if (row.span) { lines.push('|>|' + row.label + '|' + value + '|'); return; }
       var first = seen[row.family] ? '~' : row.label;
       seen[row.family] = true;
       lines.push('|' + first + '|' + row.sub + '|' + value + '|');
@@ -297,11 +157,11 @@
       lines.push('|BGCOLOR(#F5FFFA):CENTER:110|BGCOLOR(#F5FFFA):CENTER:40|BGCOLOR(#F5FFFA):LEFT:1000|c');
       GROUPS.forEach(function (group) {
         var rows = used(group, data);
-        var costumeOnly = group.id === 'myroom' && extra && filled(data.costume);
-        if (!rows.length && !costumeOnly) return;
+        var hasCostume = group.id === 'myroom' && extra && filled(data.costume);
+        if (!rows.length && !hasCostume) return;
         lines.push('|>|>|BGCOLOR(#E6E6FA):CENTER:' + group.title + '|');
         if (rows.length) pushRows(lines, rows, data);
-        if (costumeOnly) lines.push('|>|霊衣について|' + cell(data.costume) + '|');
+        if (hasCostume) lines.push('|>|霊衣について|' + cell(data.costume) + '|');
       });
     }
     lines.push('#endregion()');
@@ -309,13 +169,7 @@
   }
 
   function output() {
-    var blocks = [
-      '//新テンプレ',
-      '//  ・「……」：三点リーダー',
-      '//  ・「――」：ダッシュ',
-      '//  ・ 感嘆符、疑問符は全角。文末でなければ後ろに空白を挿入する',
-      ''
-    ];
+    var blocks = ['//新テンプレ', '//  ・「……」：三点リーダー', '//  ・「――」：ダッシュ', '//  ・ 感嘆符、疑問符は全角。文末でなければ後ろに空白を挿入する', ''];
     blocks.push(region('セリフ一覧', collect(normalHost.querySelector('.ra-editor')), false));
     Array.prototype.forEach.call(diffsHost.querySelectorAll('.ra-diff'), function (editor) {
       var data = collect(editor);
@@ -325,10 +179,7 @@
     return blocks.join('\n');
   }
 
-  function currentTalkCount(editor) {
-    return editor.querySelectorAll('[data-talk-list] [data-key^="talk"]').length;
-  }
-
+  function currentTalkCount(editor) { return editor.querySelectorAll('[data-talk-list] [data-key^="talk"]').length; }
   function addTalk(editor, forcedIndex) {
     var list = editor.querySelector('[data-talk-list]');
     var next = forcedIndex || (currentTalkCount(editor) + 1);
@@ -338,68 +189,44 @@
     list.appendChild(holder.firstChild);
   }
 
-  function ensureTalkRows(editor, data) {
-    var indices = talkIndicesFromData(data);
-    var max = indices.length ? Math.max.apply(Math, indices) : 3;
-    if (max < 3) max = 3;
+  function ensureTalkRows(editor, data, savedCount) {
+    var filledExtraIndices = talkIndicesFromData(data).filter(function (index) { return index > 3 && filled(data['talk' + index]); });
+    var maxFilled = filledExtraIndices.length ? Math.max.apply(Math, filledExtraIndices) : 3;
+    var max = Math.max(3, Number(savedCount) || 0, maxFilled);
     for (var i = 4; i <= max; i++) addTalk(editor, i);
   }
 
-  function addDiff(title, data) {
+  function addDiff(title, data, talkCount) {
     diffSerial++;
     var holder = document.createElement('div');
     holder.innerHTML = diffHtml(diffSerial, title);
     var editor = holder.firstChild;
     diffsHost.appendChild(editor);
-    if (data) {
-      ensureTalkRows(editor, data);
-      applyData(editor, data);
-    }
+    if (data) { ensureTalkRows(editor, data, talkCount); applyData(editor, data); }
     return editor;
   }
 
   function serialize() {
     var diffs = [];
     Array.prototype.forEach.call(diffsHost.querySelectorAll('.ra-diff'), function (editor) {
-      diffs.push({
-        title: editor.querySelector('[data-role="diff-title"]').value,
-        data: collect(editor)
-      });
+      diffs.push({ title: editor.querySelector('[data-role="diff-title"]').value, talkCount: currentTalkCount(editor), data: collect(editor) });
     });
-    return {
-      normal: collect(normalHost.querySelector('.ra-editor')),
-      diffs: diffs
-    };
+    return { normal: collect(normalHost.querySelector('.ra-editor')), normalTalkCount: currentTalkCount(normalHost.querySelector('.ra-editor')), diffs: diffs };
   }
 
   function save(showMessage) {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(serialize()));
-      if (showMessage !== false) setStatus('入力内容をこのブラウザに保存しました。');
-    } catch (e) {
-      if (showMessage !== false) setStatus('入力内容を保存できませんでした。', true);
-    }
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify(serialize())); if (showMessage !== false) setStatus('入力内容をこのブラウザに保存しました。'); }
+    catch (e) { if (showMessage !== false) setStatus('入力内容を保存できませんでした。', true); }
   }
 
-  function applyData(editor, data) {
-    Object.keys(data || {}).forEach(function (key) {
-      var el = editor.querySelector('[data-key="' + key + '"]');
-      if (el) el.value = data[key];
-    });
-  }
+  function applyData(editor, data) { Object.keys(data || {}).forEach(function (key) { var el = editor.querySelector('[data-key="' + key + '"]'); if (el) el.value = data[key]; }); }
 
   function migrateLegacy(data) {
     if (!data || typeof data !== 'object') return null;
-    var normal = {};
-    var diff = {};
-    Object.keys(data).forEach(function (key) {
-      if (key.indexOf('normal_') === 0) normal[key.slice(7)] = data[key];
-      else if (key.indexOf('trueName_') === 0) diff[key.slice(9)] = data[key];
-    });
+    var normal = {}, diff = {};
+    Object.keys(data).forEach(function (key) { if (key.indexOf('normal_') === 0) normal[key.slice(7)] = data[key]; else if (key.indexOf('trueName_') === 0) diff[key.slice(9)] = data[key]; });
     var result = { normal: normal, diffs: [] };
-    if (Object.keys(diff).some(function (key) { return filled(diff[key]); })) {
-      result.diffs.push({ title: '真名判明時', data: diff });
-    }
+    if (Object.keys(diff).some(function (key) { return filled(diff[key]); })) result.diffs.push({ title: '真名判明時', data: diff });
     return result;
   }
 
@@ -407,95 +234,47 @@
     try {
       var raw = localStorage.getItem(STORAGE_KEY);
       var data = raw ? JSON.parse(raw) : null;
-      if (!data) {
-        var legacyRaw = localStorage.getItem(LEGACY_KEY);
-        if (legacyRaw) data = migrateLegacy(JSON.parse(legacyRaw));
-      }
+      if (!data) { var legacyRaw = localStorage.getItem(LEGACY_KEY); if (legacyRaw) data = migrateLegacy(JSON.parse(legacyRaw)); }
       if (!data) return;
-
       var normalEditor = normalHost.querySelector('.ra-editor');
-      ensureTalkRows(normalEditor, data.normal || {});
+      ensureTalkRows(normalEditor, data.normal || {}, data.normalTalkCount);
       applyData(normalEditor, data.normal || {});
-
-      (data.diffs || []).forEach(function (item) {
-        addDiff(item.title, item.data || {});
-      });
+      (data.diffs || []).forEach(function (item) { addDiff(item.title, item.data || {}, item.talkCount); });
       setStatus('前回保存した入力内容を復元しました。');
-    } catch (e) {
-      setStatus('保存データの復元に失敗しました。', true);
-    }
+    } catch (e) { setStatus('保存データの復元に失敗しました。', true); }
   }
 
-  function generate() {
-    outputEl.value = output();
-    save(false);
-    setStatus('生成しました。未入力行と空セクションは省略しています。');
-  }
-
-  function fallbackCopy() {
-    outputEl.focus();
-    outputEl.select();
-    try {
-      document.execCommand('copy');
-      setStatus('生成結果をクリップボードへコピーしました。');
-    } catch (e) {
-      setStatus('自動コピーに失敗しました。生成結果を選択して手動でコピーしてください。', true);
-    }
-  }
-
-  function copy() {
-    if (!outputEl.value.trim()) generate();
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(outputEl.value).then(function () {
-        setStatus('生成結果をクリップボードへコピーしました。');
-      }).catch(fallbackCopy);
-    } else fallbackCopy();
-  }
+  function generate() { outputEl.value = output(); save(false); setStatus('生成しました。未入力行と空セクションは省略しています。'); }
+  function fallbackCopy() { outputEl.focus(); outputEl.select(); try { document.execCommand('copy'); setStatus('生成結果をクリップボードへコピーしました。'); } catch (e) { setStatus('自動コピーに失敗しました。生成結果を選択して手動でコピーしてください。', true); } }
+  function copy() { if (!outputEl.value.trim()) generate(); if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(outputEl.value).then(function () { setStatus('生成結果をクリップボードへコピーしました。'); }).catch(fallbackCopy); else fallbackCopy(); }
 
   function resetEditorTalks(editor) {
     var list = editor.querySelector('[data-talk-list]');
     if (!list) return;
     Array.prototype.slice.call(list.querySelectorAll('[data-key^="talk"]')).forEach(function (el) {
       var match = el.getAttribute('data-key').match(/^talk(\d+)$/);
-      if (match && Number(match[1]) > 3) {
-        var row = el.closest('.ra-row');
-        if (row && row.parentNode) row.parentNode.removeChild(row);
-      }
+      if (match && Number(match[1]) > 3) { var row = el.closest('.ra-row'); if (row && row.parentNode) row.parentNode.removeChild(row); }
     });
   }
 
   function clearAll() {
     if (!window.confirm('入力内容と保存データをすべて消去します。よろしいですか？')) return;
-    localStorage.removeItem(STORAGE_KEY);
-    localStorage.removeItem(LEGACY_KEY);
+    localStorage.removeItem(STORAGE_KEY); localStorage.removeItem(LEGACY_KEY);
     Array.prototype.forEach.call(root.querySelectorAll('textarea'), function (el) { el.value = ''; });
     resetEditorTalks(normalHost.querySelector('.ra-editor'));
-    diffsHost.innerHTML = '';
-    diffSerial = 0;
-    outputEl.value = '';
-    setStatus('クリアしました。');
+    diffsHost.innerHTML = ''; diffSerial = 0; outputEl.value = ''; setStatus('クリアしました。');
   }
 
-  root.querySelector('#ra-add-diff').addEventListener('click', function () {
-    addDiff();
-  });
+  root.querySelector('#ra-add-diff').addEventListener('click', function () { addDiff(); });
   root.querySelector('#ra-generate').addEventListener('click', generate);
   root.querySelector('#ra-copy').addEventListener('click', copy);
   root.querySelector('#ra-save').addEventListener('click', function () { save(true); });
   root.querySelector('#ra-clear').addEventListener('click', clearAll);
-
   root.addEventListener('click', function (event) {
     var addTalkButton = event.target.closest('[data-add-talk]');
-    if (addTalkButton && root.contains(addTalkButton)) {
-      addTalk(addTalkButton.closest('.ra-editor'));
-      return;
-    }
-
+    if (addTalkButton && root.contains(addTalkButton)) { addTalk(addTalkButton.closest('.ra-editor')); return; }
     var removeDiffButton = event.target.closest('[data-remove-diff]');
-    if (removeDiffButton && root.contains(removeDiffButton)) {
-      var editor = removeDiffButton.closest('.ra-diff');
-      if (editor && editor.parentNode) editor.parentNode.removeChild(editor);
-    }
+    if (removeDiffButton && root.contains(removeDiffButton)) { var editor = removeDiffButton.closest('.ra-diff'); if (editor && editor.parentNode) editor.parentNode.removeChild(editor); }
   });
 
   restore();
