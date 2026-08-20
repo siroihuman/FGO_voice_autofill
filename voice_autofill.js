@@ -306,9 +306,10 @@
     if (trueNameToggle.checked) {
       lines.push(trueRegion);
     } else {
-      lines.push('#co(){{{{{');
+      // @wiki の #javascript() 終端記号と衝突しないよう、5連続の波括弧をソースへ直書きしない。
+      lines.push('#co()' + Array(6).join('{'));
       lines.push(trueRegion);
-      lines.push('}}}}}');
+      lines.push(Array(6).join('}'));
     }
 
     lines.push('');
